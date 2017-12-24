@@ -105,7 +105,7 @@ class RoutesCommand extends Command
      * get only the line with @paramList and return this.
      * @param array $action
      * @return string    
-    ** /
+    */
     protected function getParamList($action) {
         if(!isset($action['uses'])) {
             return "";
