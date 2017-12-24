@@ -40,6 +40,7 @@ class RoutesCommand extends Command
                 'controller' => $this->getController($route['action']),
                 'action' => $this->getAction($route['action']),
                 'middleware' => $this->getMiddleware($route['action']),
+                'params' => $this->getParamList($route['action']),
             ];
         }
 
@@ -98,4 +99,38 @@ class RoutesCommand extends Command
             ? join(", ", $action['middleware'])
             : $action['middleware'] : '';
     }
+    
+    /**
+     * Read method comment with reflection
+     * get only the line with @paramList and return this.
+     * @param array $action
+     * @return string    
+    ** /
+    protected function getParamList($action) {
+        if(!isset($action['uses'])) {
+            return "";
+        }
+        list($class, $method) = explode("@", $action['uses']);
+
+        if($class[0] != "\\") {
+            $class = "\\".$class;
+        }
+
+        $reflector = new \ReflectionMethod($class,$method);
+        $comments = $reflector->getDocComment();
+        $paramList = "";
+        if(!empty($comments)) {
+            $comments = preg_split('/$\R?^/m', $comments);
+            if(!empty($comments)) {
+                foreach ($comments as $comment) {
+                    if (strstr($comment, "@paramList")) {
+                        list($pre,$paramList) = explode("@paramList", $comment);
+                        $paramList = trim($paramList);
+                    }
+                }
+            }
+        }
+        return $paramList;
+    }
+
 }
